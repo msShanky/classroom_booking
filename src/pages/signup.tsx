@@ -18,7 +18,7 @@ const SignUp = () => {
 							Login
 						</Button>
 						<Text className="text-center mt-8">
-							Already have an account?{" "}
+							Already have an account?
 							<Link href="/login" passHref>
 								<Anchor className="p-0 text-primary-600 hover:bg-none">Login</Anchor>
 							</Link>
