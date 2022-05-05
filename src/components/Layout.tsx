@@ -12,6 +12,10 @@ const links = [
 		link: "/orders",
 		label: "Orders",
 	},
+	{
+		link: "/addClassroom",
+		label: "Upload",
+	}
 ];
 
 const useStyles = createStyles(() => ({

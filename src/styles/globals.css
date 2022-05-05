@@ -19,3 +19,11 @@ a {
 	box-sizing: border-box;
 }
 
+input[type="file" i]::-webkit-file-upload-button {
+	border: 1px solid rgba(28, 126, 214, 0.75);
+	background: transparent;
+	color: #1c7ed6;
+	border-radius: 5px;
+	line-height: 1.5;
+	cursor: pointer;
+}

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { createStyles, Header, Container, Group, Burger, Title } from "@mantine/core";
+import { useSession, signIn, signOut } from "next-auth/react"
+import { createStyles, Header, Container, Group, Burger, Title, Button, Avatar } from "@mantine/core";
 import { useBooleanToggle } from "@mantine/hooks";
+import Link from 'next/link'
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -56,19 +58,20 @@ export function CustomHeader({ links }: HeaderSimpleProps) {
 	const [opened, toggleOpened] = useBooleanToggle(false);
 	const [active, setActive] = useState(links[0].link);
 	const { classes, cx } = useStyles();
+	const { data: session } = useSession()
 
 	const items = links.map((link) => (
-		<a
-			key={link.label}
+		<Link
 			href={link.link}
-			className={cx(classes.link, { [classes.linkActive]: active === link.link })}
-			onClick={(event) => {
-				event.preventDefault();
-				setActive(link.link);
-			}}
+			key={link.label}
 		>
-			{link.label}
-		</a>
+			<a
+				className={cx(classes.link, { [classes.linkActive]: active === link.link })}
+				onClick={() => { setActive(link.link); }}
+			>
+				{link.label}
+			</a>
+		</Link>
 	));
 
 	return (
@@ -79,6 +82,12 @@ export function CustomHeader({ links }: HeaderSimpleProps) {
 				</Title>
 				<Group spacing={5} className={classes.links}>
 					{items}
+					{!session
+						? <Button radius="md" variant="light" onClick={() => signIn()}>Login</Button>
+						: (<>
+							<Button color="red" variant="light" radius="md" onClick={() => signOut()}>Logout</Button>
+							<Avatar src={session?.user?.image} color="cyan" radius="xl">{session?.user?.name && session?.user?.name[0]}</Avatar>
+						</>)}
 				</Group>
 				<Burger opened={opened} onClick={() => toggleOpened()} className={classes.burger} size="sm" />
 			</Container>

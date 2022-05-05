@@ -117,9 +117,12 @@
 // 	);
 // };
 
-import React from "react";
-import { createStyles, Card, Image, ActionIcon, Group, Text, Avatar, Badge } from "@mantine/core";
+import React, { useEffect, useState } from "react";
+import { createStyles, Card, Image, ActionIcon, Group, Text, Avatar, Badge, Button } from "@mantine/core";
 import { Heart, Bookmark, Share } from "tabler-icons-react";
+import { getUser } from "../utils/firebase/database";
+import dayjs from "dayjs";
+import relativeTime from 'dayjs/plugin/relativeTime'
 
 const useStyles = createStyles((theme) => ({
 	card: {
@@ -139,18 +142,27 @@ const useStyles = createStyles((theme) => ({
 
 interface ArticleCardFooterProps {
 	image: string;
-	category: string;
+	categories: string[];
 	title: string;
-	footer: string;
-	author: {
-		name: string;
-		description: string;
-		image: string;
-	};
+	author: string;
+	likes: number;
+	created: number;
 }
 
-export function RoomCard({ image, category, title, footer, author }: ArticleCardFooterProps) {
+interface Author {
+	name?: string;
+	image?: string;
+}
+
+export function RoomCard({ image, categories, title, author, likes, created }: ArticleCardFooterProps) {
 	const { classes, theme } = useStyles();
+	const [authorData, setAuthorData] = useState<Author>({})
+	const isAvailable = true;
+	dayjs.extend(relativeTime)
+
+	useEffect(() => {
+		getUser(author).then(data => setAuthorData(data))
+	}, [author])
 
 	return (
 		<Card withBorder p="lg" radius="md" className={classes.card}>
@@ -158,18 +170,28 @@ export function RoomCard({ image, category, title, footer, author }: ArticleCard
 				<Image src={image} alt={title} height={180} />
 			</Card.Section>
 
-			<Badge>{category}</Badge>
+			<div>
+				{categories.map((category, index) => <Badge key={`${index + 1}category${category}`}>{category}</Badge>)}
+			</div>
 
 			<Text weight={700} className={classes.title} mt="xs">
 				{title}
 			</Text>
 
+			<Group position="apart" mt="xs">
+				{isAvailable
+					? <Badge color="green" radius="sm" size="sm" variant="filled">Available</Badge>
+					: <Badge color="red" radius="sm" size="lg" variant="filled">Unavailable</Badge>
+				}
+				<Button variant="outline" color="teal" compact disabled={!isAvailable}>Book Now</Button>
+			</Group>
+
 			<Group mt="lg">
-				<Avatar src={author.image} radius="sm" />
+				<Avatar src={authorData?.image} radius="lg">{authorData?.name && authorData.name[0]}</Avatar>
 				<div>
-					<Text weight={500}>{author.name}</Text>
+					<Text weight={500}>{authorData?.name}</Text>
 					<Text size="xs" color="dimmed">
-						{author.description}
+						{dayjs(created).toNow(true)} ago
 					</Text>
 				</div>
 			</Group>
@@ -177,7 +199,7 @@ export function RoomCard({ image, category, title, footer, author }: ArticleCard
 			<Card.Section className={classes.footer}>
 				<Group position="apart">
 					<Text size="xs" color="dimmed">
-						{footer}
+						{`${likes || 0} people liked this`}
 					</Text>
 					<Group spacing={0}>
 						<ActionIcon>
