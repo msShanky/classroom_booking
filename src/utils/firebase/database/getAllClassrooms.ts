@@ -7,8 +7,9 @@ const getAllClassrooms = (): Promise<DocumentData[]> => new Promise((resolve, re
     getDocs(q)
         .then((querySnapshot) => {
             const classrooms: DocumentData[] = []
-            querySnapshot.forEach(room => classrooms.push(room.data()))
-            console.log(classrooms)
+            querySnapshot.forEach(room => {
+                classrooms.push({ ...room.data(), id: room.id })
+            })
             resolve(classrooms)
         })
         .catch(e => reject(e))

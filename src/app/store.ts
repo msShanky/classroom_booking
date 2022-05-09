@@ -1,10 +1,15 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
+import currentUser from './slices/currentUser'
+import classrooms from './slices/classrooms'
 
 
 export function makeStore() {
     return configureStore({
-        reducer: {},
+        reducer: {
+            currentUser,
+            classrooms
+        },
     })
 }
 
