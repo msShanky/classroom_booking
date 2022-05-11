@@ -21,8 +21,8 @@ const bookClassroom = (options: BookingOptions): Promise<void> => new Promise((r
         bookingDate: new Date(bookingDate.setHours(0, 0, 0, 0)),
         bookedOn: new Date(),
         cancelled: false,
-        room: doc(db, 'users/' + userId),
-        user: doc(db, 'classrooms/' + roomId)
+        user: doc(db, 'users/' + userId),
+        room: doc(db, 'classrooms/' + roomId)
     }
 
     setDoc(

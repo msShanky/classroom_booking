@@ -12,12 +12,12 @@ const listenSlots = (options: SlotOptions, cb: (data: DocumentData[], unsubscrib
         collection(db, "bookings"),
         where("roomId", "==", roomId),
         where("bookingDate", "==", new Date(bookingDate.setHours(0, 0, 0, 0))),
-        where("cancelled", "==", true)
+        where("cancelled", "==", false)
     );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const bookings: DocumentData[] = []
-        querySnapshot.forEach((room) => {
-            bookings.push({ ...room.data(), id: room.id })
+        querySnapshot.forEach((booking) => {
+            bookings.push({ ...booking.data() })
         })
         cb(bookings, unsubscribe)
     })

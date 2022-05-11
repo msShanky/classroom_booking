@@ -1,10 +1,14 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { useState } from "react";
 import { Modal, Button, Group, Grid, Text, Chips, Chip, createStyles } from "@mantine/core";
-import { AlertCircle } from "tabler-icons-react";
+import { AlertCircle, CircleCheck } from "tabler-icons-react";
 import { DatePicker } from "@mantine/dates";
 import dayjs from "dayjs";
 import { useAppSelector } from "../app/store";
+import { bookClassroom, listenSlots } from "../utils/firebase/database";
+import { DocumentData, Unsubscribe } from "firebase/firestore";
+import { useRouter } from "next/router";
+import { slotReference } from "../constants/slot";
 
 const useStyles = createStyles((theme) => ({
 	chip: {
@@ -23,6 +27,7 @@ type BookingModalProps = {
 	opened: boolean;
 	handleClose: () => void;
 	roomId?: string;
+	userId?: string;
 };
 
 interface Slot {
@@ -33,25 +38,18 @@ interface Slot {
 }
 
 export const BookingModal: FunctionComponent<BookingModalProps> = (props) => {
-	const { opened, roomId, handleClose } = props;
+	const { opened, roomId, handleClose, userId } = props;
+	const router = useRouter()
 	const classrooms = useAppSelector(state => state.classrooms)
 	const room = classrooms.filter(classroom => classroom.id === roomId)[0]
 	const { classes } = useStyles();
 	const [enableSubmit, setEnableSubmit] = useState(false)
+	const [unsubscribe, setUnsubscribe] = useState<Unsubscribe | null>(null)
 	const [bookingDate, setBookingDate] = useState<Date | null>(null)
 	const [bookingSlot, setBookingSlot] = useState<string | string[]>('')
-
-	const slots: Slot[] = [
-		{ name: 'Slot 1', value: '1', time: '8am - 9am' },
-		{ name: 'Slot 2', value: '2', time: '9am - 10am' },
-		{ name: 'Slot 3', value: '3', time: '10am - 11am' },
-		{ name: 'Slot 4', value: '4', time: '11am - 12pm' },
-		{ name: 'Slot 5', value: '5', time: '12pm - 1am' },
-		{ name: 'Slot 6', value: '6', time: '1pm - 2pm' },
-		{ name: 'Slot 7', value: '7', time: '2pm - 3pm' },
-		{ name: 'Slot 8', value: '8', time: '3pm - 4pm' },
-		{ name: 'Slot 9', value: '9', time: '4pm - 5pm' },
-	]
+	const [slots, setSlots] = useState<Slot[]>([])
+	const [error, setError] = useState<string>('')
+	const [isComplete, setIsComplete] = useState<boolean>(false)
 
 	const renderError = () => (
 		<Group position="center">
@@ -64,15 +62,43 @@ export const BookingModal: FunctionComponent<BookingModalProps> = (props) => {
 		</Group>
 	)
 
-	useEffect(() => {
+	const renderSuccess = () => (
+		<Group position="center">
+			<CircleCheck
+				size={60}
+				strokeWidth={1}
+				color={'#40bf6c'}
+			/>
+			Booked Successfully!
+		</Group>
+	)
+
+	const resetState = () => {
 		setEnableSubmit(false)
 		setBookingDate(null)
 		setBookingSlot('')
+	}
+
+	useEffect(() => {
+		resetState()
 	}, [room])
 
 	useEffect(() => {
-		
-	
+		if (bookingDate) {
+			if (unsubscribe) unsubscribe()
+			listenSlots({ roomId: String(roomId), bookingDate }, (slotsData: DocumentData[], unsubscribe: Unsubscribe) => {
+				const bookedSlots: string[] = slotsData.map(slot => slot.slot)
+				setUnsubscribe(unsubscribe);
+				setSlots(Object.keys(slotReference).map(slot => {
+					const s = { name: `Slot ${slot}`, value: slot, time: slotReference[slot] }
+					if (bookedSlots.includes(slot)) return { ...s, disabled: true }
+					else return s
+				}))
+			})
+		}
+		return () => {
+			if (unsubscribe) unsubscribe()
+		}
 	}, [bookingDate])
 
 	useEffect(() => {
@@ -80,9 +106,37 @@ export const BookingModal: FunctionComponent<BookingModalProps> = (props) => {
 	}, [bookingDate, bookingSlot])
 
 
+	const handleSubmit = async () => {
+		try {
+			if (roomId && bookingDate && userId && bookingSlot) {
+				await bookClassroom({
+					roomId,
+					bookingDate,
+					userId,
+					slot: String(bookingSlot)
+				})
+				setIsComplete(true)
+				setTimeout(() => {
+					router.push('/orders')
+				}, 2000);
+			}
+
+		} catch (error) {
+			setError(String(error))
+		}
+
+	}
+
 	return (
-		<Modal opened={opened} onClose={handleClose} withCloseButton={false}>
-			{!room ? renderError() : (
+		<Modal
+			opened={opened}
+			onClose={() => {
+				resetState()
+				handleClose()
+			}}
+			withCloseButton={false}
+		>
+			{isComplete ? renderSuccess() : ((!room || error) ? renderError() : (
 				<Grid>
 					<Grid.Col span={12}>
 						<Text weight={700} mt="xs">
@@ -100,7 +154,7 @@ export const BookingModal: FunctionComponent<BookingModalProps> = (props) => {
 							maxDate={dayjs(new Date()).add(30, 'days').toDate()}
 						/>
 					</Grid.Col>
-					{bookingDate && (
+					{(bookingDate && slots.length) ? (
 						<>
 							<Grid.Col span={12}>
 								<Text>
@@ -110,19 +164,19 @@ export const BookingModal: FunctionComponent<BookingModalProps> = (props) => {
 							<Grid.Col span={12}>
 								<Chips color="green" variant="filled" spacing="md" size="md" radius="md" value={bookingSlot} onChange={setBookingSlot}>
 									{slots.map(slot => (
-										<Chip value={slot.value} className={classes.chip} disabled={!!slot?.disabled}>
+										<Chip key={slot.value} value={slot.value} className={classes.chip} disabled={!!slot?.disabled}>
 											{slot.name}<br />(&nbsp;{slot.time}&nbsp;)
 										</Chip>
 									))}
 								</Chips>
 							</Grid.Col>
 							<Grid.Col span={12}>
-								<Button fullWidth size="md" onClick={() => { }} variant="outline" color="teal" disabled={!enableSubmit}>Book Now</Button>
+								<Button fullWidth size="md" onClick={() => { handleSubmit() }} variant="outline" color="teal" disabled={!enableSubmit}>Book Now</Button>
 							</Grid.Col>
 						</>
-					)}
+					) : <></>}
 				</Grid>
-			)}
+			))}
 		</Modal>
 	);
 };

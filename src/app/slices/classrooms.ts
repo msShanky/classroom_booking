@@ -1,10 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { getDoc, Unsubscribe } from 'firebase/firestore';
-import { getAllClassrooms, getUser, updateClassroomLike, updateUser } from '../../utils/firebase/database';
-import listenAllClassrooms from '../../utils/firebase/database/listenAllClassrooms';
+import { listenAllClassrooms } from '../../utils/firebase/database';
 import { AppDispatch } from '../store';
 
-interface ClassroomState {
+export interface ClassroomState {
   imageURL: string;
   roomName: string;
   tags: string[];

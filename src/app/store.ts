@@ -8,7 +8,7 @@ export function makeStore() {
     return configureStore({
         reducer: {
             currentUser,
-            classrooms
+            classrooms,
         },
     })
 }

@@ -179,7 +179,7 @@ export function RoomCard(options: RoomCardProps) {
 			dispatch(updateUserArray({
 				type: 'bookmarks',
 				value: id,
-				action: currentUser?.bookmarks?.includes(id) ? 'remove' : 'add'
+				action: currentUser?.bookmarks?.map(c => c.id).includes(id) ? 'remove' : 'add'
 			}))
 		}
 	}
@@ -189,7 +189,7 @@ export function RoomCard(options: RoomCardProps) {
 			dispatch(updateUserArray({
 				type: 'likes',
 				value: id,
-				action: currentUser?.likes?.includes(id) ? 'remove' : 'add'
+				action: currentUser?.likes?.map(c => c.id).includes(id) ? 'remove' : 'add'
 			}))
 		}
 	}
@@ -204,7 +204,7 @@ export function RoomCard(options: RoomCardProps) {
 				{categories.map((category, index) => <Badge key={`${index + 1}category${category}`}>{category}</Badge>)}
 			</div>
 
-			<Text weight={700} className={classes.title} mt="xs">
+			<Text weight={600} className={classes.title} mt="xs">
 				{title}
 			</Text>
 
@@ -230,14 +230,14 @@ export function RoomCard(options: RoomCardProps) {
 					<Group spacing={0}>
 						<ActionIcon>
 							<Heart
-								fill={currentUser?.likes?.includes(String(id)) ? theme.colors.red[6] : 'none'}
+								fill={currentUser?.likes?.map(c => c.id).includes(String(id)) ? theme.colors.red[6] : 'none'}
 								onClick={toggleLikes}
 								size={18}
 								color={theme.colors.red[6]} />
 						</ActionIcon>
 						<ActionIcon>
 							<Bookmark
-								fill={currentUser?.bookmarks?.includes(String(id)) ? theme.colors.yellow[6] : 'none'}
+								fill={currentUser?.bookmarks?.map(c => c.id).includes(String(id)) ? theme.colors.yellow[6] : 'none'}
 								onClick={toggleBookmark}
 								size={18}
 								color={theme.colors.yellow[6]} />

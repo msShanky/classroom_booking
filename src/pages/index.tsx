@@ -44,7 +44,7 @@ const Home: NextPage = () => {
 	return (
 		<Layout>
 			<main className={classes.mainContainer}>
-				<BookingModal roomId={activeRoom} opened={isModalOpened} handleClose={() => setModalOpened(false)} />
+				<BookingModal userId={String(session?.id)} roomId={activeRoom} opened={isModalOpened} handleClose={() => setModalOpened(false)} />
 				<div className={classes.cardContainer}>
 					{classrooms.map((room, index) => {
 						const uniqueId = `ROOM_${room.roomName}_${(index + 123) * 4568}`;
