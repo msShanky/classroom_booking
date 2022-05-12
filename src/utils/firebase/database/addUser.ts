@@ -14,7 +14,7 @@ const addUser = (options: IUserOptions): Promise<void> => new Promise((resolve, 
 
     setDoc(
         doc(db, "users", id),
-        { ...options, likes: [], bookmarks: [] },
+        { ...options },
         { merge: true })
         .then(() => resolve())
         .catch(e => reject(e))
