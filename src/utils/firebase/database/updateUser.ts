@@ -1,15 +1,15 @@
 import { doc, setDoc } from "firebase/firestore";
-import { db } from '../'
+import { db } from '..'
 
-interface IUserOptions {
-    email?: string | undefined | null;
+interface UpdateUserOptions {
     id: string;
     image?: string | null | undefined;
     name?: string | null | undefined;
-    provider: string;
+    likes?: string[];
+    bookmarks?: string[];
 }
 
-const addUser = (options: IUserOptions): Promise<void> => new Promise((resolve, reject) => {
+const updateUser = (options: UpdateUserOptions): Promise<void> => new Promise((resolve, reject) => {
     const { id } = options
 
     setDoc(
@@ -20,4 +20,4 @@ const addUser = (options: IUserOptions): Promise<void> => new Promise((resolve, 
         .catch(e => reject(e))
 })
 
-export default addUser
+export default updateUser

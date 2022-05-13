@@ -86,7 +86,9 @@ export function CustomHeader({ links }: HeaderSimpleProps) {
 						? <Button radius="md" variant="light" onClick={() => signIn()}>Login</Button>
 						: (<>
 							<Button color="red" variant="light" radius="md" onClick={() => signOut()}>Logout</Button>
-							<Avatar src={session?.user?.image} color="cyan" radius="xl">{session?.user?.name && session?.user?.name[0]}</Avatar>
+							<Link href={'/profile'}							>
+								<Avatar src={session?.user?.image} color="cyan" radius="xl">{session?.user?.name && session?.user?.name[0]}</Avatar>
+							</Link>
 						</>)}
 				</Group>
 				<Burger opened={opened} onClick={() => toggleOpened()} className={classes.burger} size="sm" />

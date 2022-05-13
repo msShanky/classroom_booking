@@ -123,10 +123,13 @@ import { Heart, Bookmark, Share } from "tabler-icons-react";
 import { getUser } from "../utils/firebase/database";
 import dayjs from "dayjs";
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { useAppDispatch, useAppSelector } from "../app/store";
+import { updateUserArray } from "../app/slices/currentUser";
 
 const useStyles = createStyles((theme) => ({
 	card: {
 		backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
+		margin: '5px'
 	},
 
 	title: {
@@ -140,32 +143,59 @@ const useStyles = createStyles((theme) => ({
 	},
 }));
 
-interface ArticleCardFooterProps {
+interface RoomCardProps {
 	image: string;
 	categories: string[];
 	title: string;
 	author: string;
 	likes: number;
 	created: number;
+	id?: string;
+	onBookNow: (id: string) => void
 }
 
 interface Author {
 	name?: string;
 	image?: string;
+	bookmarks?: string[];
 }
 
-export function RoomCard({ image, categories, title, author, likes, created }: ArticleCardFooterProps) {
+export function RoomCard(options: RoomCardProps) {
+	const { image, categories, title, author, likes, created, id, onBookNow } = options
 	const { classes, theme } = useStyles();
 	const [authorData, setAuthorData] = useState<Author>({})
 	const isAvailable = true;
+	const currentUser = useAppSelector((state) => state.currentUser)
+	const dispatch = useAppDispatch()
+
 	dayjs.extend(relativeTime)
 
 	useEffect(() => {
 		getUser(author).then(data => setAuthorData(data))
 	}, [author])
 
+	const toggleBookmark = async () => {
+		if (id) {
+			dispatch(updateUserArray({
+				type: 'bookmarks',
+				value: id,
+				action: currentUser?.bookmarks?.map(c => c.id).includes(id) ? 'remove' : 'add'
+			}))
+		}
+	}
+
+	const toggleLikes = async () => {
+		if (id) {
+			dispatch(updateUserArray({
+				type: 'likes',
+				value: id,
+				action: currentUser?.likes?.map(c => c.id).includes(id) ? 'remove' : 'add'
+			}))
+		}
+	}
+
 	return (
-		<Card withBorder p="lg" radius="md" className={classes.card}>
+		<Card withBorder p="lg" radius="md" shadow='sm' className={classes.card}>
 			<Card.Section mb="sm">
 				<Image src={image} alt={title} height={180} />
 			</Card.Section>
@@ -174,16 +204,12 @@ export function RoomCard({ image, categories, title, author, likes, created }: A
 				{categories.map((category, index) => <Badge key={`${index + 1}category${category}`}>{category}</Badge>)}
 			</div>
 
-			<Text weight={700} className={classes.title} mt="xs">
+			<Text weight={600} className={classes.title} mt="xs">
 				{title}
 			</Text>
 
 			<Group position="apart" mt="xs">
-				{isAvailable
-					? <Badge color="green" radius="sm" size="sm" variant="filled">Available</Badge>
-					: <Badge color="red" radius="sm" size="lg" variant="filled">Unavailable</Badge>
-				}
-				<Button variant="outline" color="teal" compact disabled={!isAvailable}>Book Now</Button>
+				<Button fullWidth onClick={() => onBookNow(String(id))} variant="outline" color="teal" compact disabled={!isAvailable}>Book Now</Button>
 			</Group>
 
 			<Group mt="lg">
@@ -199,14 +225,22 @@ export function RoomCard({ image, categories, title, author, likes, created }: A
 			<Card.Section className={classes.footer}>
 				<Group position="apart">
 					<Text size="xs" color="dimmed">
-						{`${likes || 0} people liked this`}
+						{`${likes > 0 ? likes : 0} people liked this`}
 					</Text>
 					<Group spacing={0}>
 						<ActionIcon>
-							<Heart size={18} color={theme.colors.red[6]} />
+							<Heart
+								fill={currentUser?.likes?.map(c => c.id).includes(String(id)) ? theme.colors.red[6] : 'none'}
+								onClick={toggleLikes}
+								size={18}
+								color={theme.colors.red[6]} />
 						</ActionIcon>
 						<ActionIcon>
-							<Bookmark size={18} color={theme.colors.yellow[6]} />
+							<Bookmark
+								fill={currentUser?.bookmarks?.map(c => c.id).includes(String(id)) ? theme.colors.yellow[6] : 'none'}
+								onClick={toggleBookmark}
+								size={18}
+								color={theme.colors.yellow[6]} />
 						</ActionIcon>
 						<ActionIcon>
 							<Share size={16} color={theme.colors.blue[6]} />

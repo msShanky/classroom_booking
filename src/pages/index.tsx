@@ -1,11 +1,13 @@
 import { createStyles } from "@mantine/core";
 import type { NextPage } from "next";
-import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { fetchClassrooms } from "../app/slices/classrooms";
+import { fetchUser } from "../app/slices/currentUser";
+import { useAppDispatch, useAppSelector } from "../app/store";
 import { BookingModal } from "../components/BookingModal";
 import { Layout } from "../components/Layout";
 import { RoomCard } from "../components/RoomCard";
-import { Room, rooms } from "../data/mock_rooms";
-import { getAllClassrooms } from "../utils/firebase/database";
 
 const useStyles = createStyles(() => ({
 	mainContainer: {
@@ -14,32 +16,52 @@ const useStyles = createStyles(() => ({
 	},
 	cardContainer: {
 		display: "flex",
-		flexDirection: "column",
+		flexDirection: "row",
+		flexWrap: 'wrap',
 		alignItems: "center",
 	},
 }));
 
-const Home: NextPage = ({ classrooms }) => {
+const Home: NextPage = () => {
 	const [isModalOpened, setModalOpened] = useState(false);
-	const [activeRoom, setActiveRoom] = useState<Room>();
+	const [activeRoom, setActiveRoom] = useState<string>();
 	const { classes } = useStyles();
+	const { data: session } = useSession()
+	const dispatch = useAppDispatch()
+	const classrooms = useAppSelector(state => state.classrooms)
+
+	useEffect(() => {
+		if (session) {
+			dispatch(fetchUser(String(session.id)))
+		}
+	}, [session?.id])
+
+	useEffect(() => {
+		dispatch(fetchClassrooms())
+	}, [])
+
 
 	return (
 		<Layout>
 			<main className={classes.mainContainer}>
-				<BookingModal room={activeRoom} opened={isModalOpened} handleClose={() => setModalOpened(false)} />
+				<BookingModal userId={String(session?.id)} roomId={activeRoom} opened={isModalOpened} handleClose={() => setModalOpened(false)} />
 				<div className={classes.cardContainer}>
 					{classrooms.map((room, index) => {
-						const uniqueId = `ROOM_${room.name}_${(index + 123) * 4568}`;
+						const uniqueId = `ROOM_${room.roomName}_${(index + 123) * 4568}`;
 						return (
 							<RoomCard
 								key={uniqueId}
 								image={room.imageURL}
-								title={room.name}
+								title={room.roomName}
 								categories={room.tags}
 								author={room.authorId}
 								likes={room.likeCount}
 								created={room.created.seconds * 1000}
+								id={room.id}
+								onBookNow={(id: string) => {
+									setActiveRoom(id);
+									setModalOpened(true);
+								}}
 							/>
 						);
 					})}
@@ -48,15 +70,6 @@ const Home: NextPage = ({ classrooms }) => {
 		</Layout>
 	);
 };
-
-export async function getServerSideProps() {
-	const classrooms = await getAllClassrooms();
-	return {
-		props: {
-			classrooms: JSON.parse(JSON.stringify(classrooms))
-		},
-	}
-}
 
 export default Home;
 
