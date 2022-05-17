@@ -11,6 +11,7 @@ export interface ClassroomState {
   likeCount: number;
   created: { seconds: number };
   id: string;
+  isActive: boolean
 }
 
 const initialState = [] as ClassroomState[]

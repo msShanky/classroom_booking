@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { Layout } from "../../components/Layout";
 import { uploadImage } from '../../utils/firebase/storage'
 import { addClassRoom } from "../../utils/firebase/database";
+import withAuth from "../../utils/HOC/withAuth";
 
 const AddClassroom = () => {
     const router = useRouter()
@@ -75,7 +76,7 @@ const AddClassroom = () => {
     }
 
     return (
-        <Layout>
+        <>
             <Modal
                 opened={!!error}
                 onClose={() => setError('')}
@@ -178,8 +179,8 @@ const AddClassroom = () => {
                     </Grid>
                 </form>
             </Box>
-        </Layout >
+        </>
     );
 };
 
-export default AddClassroom;
+export default withAuth(AddClassroom,true);

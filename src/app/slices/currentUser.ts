@@ -27,6 +27,7 @@ interface UserState {
   likes: ClassroomState[];
   bookmarks: ClassroomState[];
   orders: BookingOptions[];
+  type?: 'User' | 'Admin' 
 }
 
 interface UpdateArrayOptions {
