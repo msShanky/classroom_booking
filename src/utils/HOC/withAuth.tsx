@@ -6,7 +6,7 @@ import React, { useEffect } from "react";
 import { useAppSelector } from "../../app/store";
 import Unauthorized from "../../components/Unauthorized";
 
-const withAuth = (WrappedComponent, isAdmin?: boolean) => {
+const withAuth = (WrappedComponent: any, isAdmin?: boolean) => {
 
   return (props: any) => {
     const { data: session, status } = useSession()

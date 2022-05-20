@@ -10,6 +10,7 @@ import { Layout } from "../components/Layout";
 
 export default function App(props: AppProps) {
 	const { Component, pageProps: { session, ...pageProps } } = props;
+	const AnyComponent = Component as any;
 
 	return (
 		<Provider store={store}>
@@ -21,7 +22,7 @@ export default function App(props: AppProps) {
 				<NotificationsProvider position="top-center" zIndex={2077}>
 					<SessionProvider session={session}>
 						<Layout>
-							<Component {...pageProps} />
+							<AnyComponent {...pageProps} />
 						</Layout>
 					</SessionProvider>
 				</NotificationsProvider>

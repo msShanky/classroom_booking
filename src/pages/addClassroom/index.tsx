@@ -130,7 +130,7 @@ const AddClassroom = () => {
                                             reader.readAsArrayBuffer(file);
                                             reader.onloadend = (evt) => {
                                                 if (evt.target && (evt.target.readyState === FileReader.DONE)) {
-                                                    const arrayBuffer = evt.target.result
+                                                    const arrayBuffer = evt.target.result as ArrayBuffer
                                                     console.log('type', typeof arrayBuffer)
                                                     const array = new Uint8Array(arrayBuffer);
                                                     setImage([array, file.type])
