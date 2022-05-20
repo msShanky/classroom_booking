@@ -8,10 +8,10 @@ interface ClassRoomOptions {
     startDate: Date | null;
     closeDate: Date | null;
     authorId: any;
-    author: DocumentReference<DocumentData>;
+    author?: DocumentReference<DocumentData>;
     created?: Date;
     likeCount?: number;
-    isActive: boolean
+    isActive?: boolean
 }
 
 const addClassRoom = (options: ClassRoomOptions): Promise<void> => new Promise((resolve, reject) => {

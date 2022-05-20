@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react"
 import { createStyles, Header, Container, Group, Burger, Title, Button, Avatar } from "@mantine/core";
 import { useBooleanToggle } from "@mantine/hooks";
 import Link from 'next/link'
+import { useRouter } from "next/router";
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -56,7 +57,8 @@ interface HeaderSimpleProps {
 
 export function CustomHeader({ links }: HeaderSimpleProps) {
 	const [opened, toggleOpened] = useBooleanToggle(false);
-	const [active, setActive] = useState(links[0].link);
+	const { pathname } = useRouter()
+	const [active, setActive] = useState(pathname);
 	const { classes, cx } = useStyles();
 	const { data: session } = useSession()
 
@@ -74,12 +76,18 @@ export function CustomHeader({ links }: HeaderSimpleProps) {
 		</Link>
 	));
 
+	useEffect(() => {
+		setActive(pathname);
+	})
+
 	return (
 		<Header classNames={{ root: "border-none" }} height={60} mb={20}>
 			<Container className="container flex flex-row justify-between">
-				<Title className="font-bold font-sans text-primary-600 select-none hover:cursor-pointer hover:text-secondary-500">
-					ClassB_<span className="text-6xl">.</span>
-				</Title>
+				<Link href={'/'}>
+					<Title className="font-bold font-sans text-primary-600 select-none hover:cursor-pointer hover:text-secondary-500">
+						ClassB_<span className="text-6xl">.</span>
+					</Title>
+				</Link>
 				<Group spacing={5} className={classes.links}>
 					{items}
 					{!session
@@ -93,6 +101,6 @@ export function CustomHeader({ links }: HeaderSimpleProps) {
 				</Group>
 				<Burger opened={opened} onClick={() => toggleOpened()} className={classes.burger} size="sm" />
 			</Container>
-		</Header>
+		</Header >
 	);
 }
