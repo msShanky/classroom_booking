@@ -6,7 +6,7 @@ import { listenOrders, listenUser, updateClassroomLike, updateUser } from '../..
 import { AppDispatch } from '../store';
 import { ClassroomState } from './classrooms';
 
-interface BookingOptions {
+export interface BookingOptions {
   roomId: string;
   userId: any;
   room: ClassroomState;

@@ -46,10 +46,11 @@ export const BookingModal: FunctionComponent<BookingModalProps> = (props) => {
 	const [enableSubmit, setEnableSubmit] = useState(false)
 	const [unsubscribe, setUnsubscribe] = useState<Unsubscribe | null>(null)
 	const [bookingDate, setBookingDate] = useState<Date | null>(null)
-	const [bookingSlot, setBookingSlot] = useState<string | string[]>('')
+	const [bookingSlot, setBookingSlot] = useState<string[]>([])
 	const [slots, setSlots] = useState<Slot[]>([])
 	const [error, setError] = useState<string>('')
 	const [isComplete, setIsComplete] = useState<boolean>(false)
+	const [isBooking, setIsBooking] = useState<boolean>(false)
 
 	const renderError = () => (
 		<Group position="center">
@@ -76,7 +77,8 @@ export const BookingModal: FunctionComponent<BookingModalProps> = (props) => {
 	const resetState = () => {
 		setEnableSubmit(false)
 		setBookingDate(null)
-		setBookingSlot('')
+		setBookingSlot([])
+		setIsBooking(false)
 	}
 
 	useEffect(() => {
@@ -102,29 +104,38 @@ export const BookingModal: FunctionComponent<BookingModalProps> = (props) => {
 	}, [bookingDate])
 
 	useEffect(() => {
-		setEnableSubmit(!!(bookingDate && bookingSlot))
-	}, [bookingDate, bookingSlot])
+		setEnableSubmit(!!(bookingDate && bookingSlot.length))
+	}, [bookingDate, bookingSlot.length])
 
 
-	const handleSubmit = async () => {
-		try {
-			if (roomId && bookingDate && userId && bookingSlot) {
-				await bookClassroom({
-					roomId,
-					bookingDate,
-					userId,
-					slot: String(bookingSlot)
-				})
-				setIsComplete(true)
-				setTimeout(() => {
-					router.push('/orders')
-				}, 2000);
+	const handleSubmit = async (slots: string[]) => {
+		setIsBooking(true)
+		let remainingSlots = slots;
+		if (roomId && bookingDate && userId && slots.length) {
+			for (let i = 0; i < slots.length; i++) {
+				try {
+					await bookClassroom({
+						roomId,
+						bookingDate,
+						userId,
+						slot: String(slots[i])
+					})
+					remainingSlots = remainingSlots.filter(s => s != slots[i])
+					setBookingSlot(remainingSlots)
+					if (i === (slots.length - 1)) {
+						setIsComplete(true)
+						setTimeout(() => {
+							router.push('/orders')
+						}, 2000);
+					}
+
+				} catch (error) {
+					setError(String(error));
+					break;
+				}
 			}
-
-		} catch (error) {
-			setError(String(error))
 		}
-
+		setIsBooking(false)
 	}
 
 	return (
@@ -162,7 +173,7 @@ export const BookingModal: FunctionComponent<BookingModalProps> = (props) => {
 								</Text>
 							</Grid.Col>
 							<Grid.Col span={12}>
-								<Chips color="green" variant="filled" spacing="md" size="md" radius="md" value={bookingSlot} onChange={setBookingSlot}>
+								<Chips multiple color="green" variant="filled" spacing="md" size="md" radius="md" value={bookingSlot} onChange={(v) => !isBooking && setBookingSlot(v)}>
 									{slots.map(slot => (
 										<Chip key={slot.value} value={slot.value} className={classes.chip} disabled={!!slot?.disabled}>
 											{slot.name}<br />(&nbsp;{slot.time}&nbsp;)
@@ -171,7 +182,7 @@ export const BookingModal: FunctionComponent<BookingModalProps> = (props) => {
 								</Chips>
 							</Grid.Col>
 							<Grid.Col span={12}>
-								<Button fullWidth size="md" onClick={() => { handleSubmit() }} variant="outline" color="teal" disabled={!enableSubmit}>Book Now</Button>
+								<Button loading={isBooking} fullWidth size="md" onClick={() => { handleSubmit(bookingSlot) }} variant="outline" color="teal" disabled={!enableSubmit}>Book Now</Button>
 							</Grid.Col>
 						</>
 					) : <></>}
