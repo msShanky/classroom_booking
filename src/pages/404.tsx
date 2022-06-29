@@ -8,12 +8,12 @@ const Error404 = () => {
         <Container style={{ maxWidth: 1024, height: 500, paddingTop: '5%' }}>
             <div className='flex flex-col'>
                 <div>
-                    <Title order={1}>Oops! The room you are searching doesn't exist.</Title>
+                    <Title order={1}>Oops! The room you are searching doesn&apos;t exist.</Title>
                     <Title order={4}>404 not found.</Title>
                 </div>
                 <br/><br/><br/>
                 <div>
-                    <Link href={'/'}>
+                    <Link href={'/'} passHref>
                             <Text weight={'bold'} size="lg" color={'#4f46e5'} className='flex cursor-pointer items-center'>
                                 <SignLeft
                                     size={48}
