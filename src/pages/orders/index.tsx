@@ -1,7 +1,9 @@
-import { createStyles } from "@mantine/core";
+import { Container, createStyles, Text, Title } from "@mantine/core";
 import type { NextPage } from "next";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useEffect } from "react";
+import { ArrowNarrowRight } from "tabler-icons-react";
 import { fetchOrders } from "../../app/slices/currentUser";
 import { useAppDispatch, useAppSelector } from "../../app/store";
 import OrderCard from "../../components/OrderCard";
@@ -32,6 +34,32 @@ const Order: NextPage = () => {
         }
     }, [session?.id])
 
+    const NoOrders = () => {
+        return (
+            <Container style={{ maxWidth: 1024, height: 500, paddingTop: '5%' }}>
+                <div className='flex flex-col'>
+                    <div>
+                        <Title order={1}>Oops! There are no orders.</Title>
+                    </div>
+                    <br /><br /><br />
+                    <div>
+                        <Link href={'/'}>
+                            <Text weight={'bold'} size="lg" color={'#4f46e5'} className='flex cursor-pointer items-center'>
+                                Look for Classrooms&nbsp;
+                                <ArrowNarrowRight
+                                    size={24}
+                                    strokeWidth={3}
+                                    color={'#4f46e5'}
+                                />
+                            </Text>
+                        </Link>
+                    </div>
+                </div>
+            </Container>
+        )
+    }
+
+    if (!orders.length) return <NoOrders />
     return (
         <div className={classes.cardContainer}>
             {orders.map((order) => {

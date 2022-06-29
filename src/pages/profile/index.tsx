@@ -64,6 +64,7 @@ const Profile: NextPage = () => {
                         </Group>
                     )}>
                     <div className={classes.cardContainer}>
+                        {!bookmarks.length && <Text>You haven't bookmarked any rooms.</Text>}
                         {bookmarks.map((room, index) => {
                             const uniqueId = `ROOM_${room.roomName}_${(index + 123) * 4568}`;
                             return (
@@ -100,6 +101,7 @@ const Profile: NextPage = () => {
                     )}>
 
                     <div className={classes.cardContainer} >
+                        {!likes.length && <Text>You haven't any liked rooms yet.</Text>}
 
                         {likes.map((room, index) => {
                             const uniqueId = `ROOM_${room.roomName}_${(index + 123) * 4568}`;
